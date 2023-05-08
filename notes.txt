@@ -1,0 +1,44 @@
+General info: we are planning to use file.db to store data locally on our machine (is this feasible?)
+              we are using flask for the backend, i can provide the files
+              The structure of the project is already defined and files are divided in folders and inside a repository in git.
+              I can provide all the nmecessary information you might need to better answer my requests.
+
+
+Login.html
+  simple login page with username and password
+  for this first part of the project we are not gonna use a db to store the credential but we are redirectin function to visualize the data about that specific class once the user has input the userneme, basically the password is useless in this first version.
+
+Class_data.html
+  2 main menù: input data and visualize data
+
+  Input data:
+    in this section the professor selects the tranbsportation mode every student used that morning to get to scholl.
+    Possible to chose between: foot, bike, car, bus, carpooling, other
+    The professor repeat the process for every student (approx 20)
+
+  Visualize data:
+    a dashboard to visualize the data on tranbsportation mode, possibilioty to filter by date.
+    It is possiblke to visualize only the data for the class we have logged in at the beginning (not the data for all tge classes)
+
+
+app
+  __init__.py
+  __pycache__
+  config.py
+  models.py
+  routes.py
+  static
+    css
+    js
+  templates
+    admin_dashboard.html
+    base.html
+    class_data.html
+    home.html
+    login.html
+manage.py
+Procfile
+README.md
+requirements.txt
+run_locally.py
+runtime.txt
