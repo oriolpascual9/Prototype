@@ -5,13 +5,15 @@ class Votation(db.Model):
     __tablename__ = "votation"
 
     id = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.DateTime)
+    date = db.Column(db.DateTime, default=datetime.utcnow)
     class_id = db.Column(db.Integer, db.ForeignKey('class.id'))
-    voting_class = relationship('Class', back_populates='votations')
+    voting_class = db.relationship('Class', back_populates='votations')
     results = db.Column(db.ARRAY(db.Integer))
 
     def add_vote(self, transport_mode_index):
         self.results[transport_mode_index] += 1
+        db.session.commit()
+
 
 class Class(db.Model):
     __tablename__ = "class"
@@ -25,6 +27,13 @@ class Class(db.Model):
     last_votation = relationship('Votation', uselist=False, post_update=True)
     avg_results = db.Column(db.ARRAY(db.Integer))
     votations = relationship('Votation', back_populates='voting_class')
+
+	votes = db.relationship('Vote', back_populates='class_rel')
+
+    def add_vote(self, transport_mode):
+        new_vote = Vote(transport_mode=transport_mode, class_id=self.id)
+        db.session.add(new_vote)
+        db.session.commit()
 
 class School(db.Model):
     __tablename__ = 'schools'

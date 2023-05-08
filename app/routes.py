@@ -49,15 +49,11 @@ def submit_vote():
         return redirect(url_for('home'))
 
     # Fetch the class data using the class_id
-    class_data = Class.query.get(class_id)
+    class_data = ClassNameHere.query.get(class_id)
 
     # Update the class_data with the submitted vote
-    transport_mode = int(request.form['transport_mode'])  # Convert the submitted value to an integer
-    # Assuming you have a method called `add_vote` in your Votation model
-    class_data.last_votation.add_vote(transport_mode)  # Updated to use last_votation
-
-    # Commit the changes to the database
-    db.session.commit()
+    transport_mode = request.form['transport_mode']
+    class_data.add_vote(transport_mode)
 
     # Redirect to the class_data page
     return redirect(url_for('class_data'))
