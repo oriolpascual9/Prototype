@@ -7,7 +7,7 @@ class Votation(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	date = db.Column(db.DateTime)
 	voting_class = relationship('Class')
-	results = db.Column(db.ARRAY(db.Integer)) #
+	results = db.Column(db.ARRAY(db.Integer))
 
 
 class Class(db.Model):
@@ -18,6 +18,9 @@ class Class(db.Model):
 	name = db.Column(db.String(100))
 	nstudents = db.Column(db.Integer)
 	school = relationship('School')
+	last_votation = db.Column(db.Integer)
+	avg_results = db.Column(db.ARRAY(db.Integer))
+	
 
 class School(db.Model):
 	__tablename__ = 'schools'
