@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Add this line to include the CSS file -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <!-- Include Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <title>Class Data</title>
+</head>
+<body>
+    <div class="container">
+        <h2 class="text-center mt-4">Class Data</h2>
+
+        <div class="row">
+            <div class="col-md-6">
+                <h3>Input Data</h3>
+                <div class="d-flex flex-wrap justify-content-center mt-4">
+                    <button class="btn btn-primary m-2" id="foot" data-mode="foot">Foot</button>
+                    <button class="btn btn-primary m-2" id="bike" data-mode="bike">Bike</button>
+                    <button class="btn btn-primary m-2" id="car" data-mode="car">Car</button>
+                    <button class="btn btn-primary m-2" id="bus" data-mode="bus">Bus</button>
+                    <button class="btn btn-primary m-2" id="carpooling" data-mode="carpooling">Carpooling</button>
+                    <button class="btn btn-primary m-2" id="other" data-mode="other">Other</button>
+                </div>
+                <button class="btn btn-danger mt-3" id="return">Return</button>
+            </div>
+            <div class="col-md-6">
+                <h3>Visualize Data</h3>
+                <div id="data-dashboard" class="mt-4">
+                    <!-- Add data visualization elements here -->
+                </div>
+                <div class="form-group mt-3">
+                    <label for="date-filter">Filter by date</label>
+                    <input type="date" class="form-control" id="date-filter" name="date-filter">
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Include jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Include Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <!-- Add this line to include the main.js file -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
