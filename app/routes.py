@@ -1,10 +1,10 @@
 import flask
 from flask import flash, session
-from app.models import Class  # Updated to import the Class model from models.py
+from app.models import Class, Votation  # Updated to import the Class model from models.py
 from flask import render_template, url_for, request, redirect
 from app import db
 from app import app
-from datetime import date
+from datetime import date, datetime
 
 @app.route('/')
 def home():  # Renamed to avoid conflicting with the other 'login' function
@@ -49,11 +49,28 @@ def submit_vote():
         return redirect(url_for('home'))
 
     # Fetch the class data using the class_id
-    class_data = ClassNameHere.query.get(class_id)
+
+    votation_data = session.query(Votation).filter(class_id)
+    today = datetime(2023, 5, 15, 11, 18, 23, 628854)
+    created = False
+    for vote in votation_data:
+        if vote.date == today:
+            created = True
+            todays_votation = vote
+
+    if not created:
+        todays_votation = Votation(date = today, class_id= class_id)
+
+    transport_mode = request.form['transport_mode']
+
+    if transport_mode == 1:
+        print("Woooorking")
+        todays_votation.nwalking += 1
+
+    elif transport_mode == 2:
+        todays_votation.ncycling += 1
 
     # Update the class_data with the submitted vote
-    transport_mode = request.form['transport_mode']
-    class_data.add_vote(transport_mode)
 
     # Redirect to the class_data page
     return redirect(url_for('class_data'))
