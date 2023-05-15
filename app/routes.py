@@ -49,27 +49,37 @@ def submit_vote():
         return redirect(url_for('home'))
 
     # Fetch the class data using the class_id
-
-    votation_data = session.query(Votation).filter(class_id)
     today = datetime(2023, 5, 15, 11, 18, 23, 628854)
-    created = False
-    for vote in votation_data:
-        if vote.date == today:
-            created = True
-            todays_votation = vote
-
-    if not created:
-        todays_votation = Votation(date = today, class_id= class_id)
-
     transport_mode = request.form['transport_mode']
+    votation_data = db.session.query(Votation).filter(Votation.date==today and Votation.class_id==class_id)
 
-    if transport_mode == 1:
-        print("Woooorking")
-        todays_votation.nwalking += 1
+    if not votation_data.first():
+        todays_votation = Votation(date = today, class_id= class_id)
+        db.session.add(todays_votation)
+        db.session.commit()
 
-    elif transport_mode == 2:
-        todays_votation.ncycling += 1
+        votation_data = db.session.query(Votation).filter(Votation.date==today and Votation.class_id==class_id)
 
+    record = votation_data.first() #should only be one
+    if transport_mode == 'foot':
+        record.nwalking += 1
+
+    elif transport_mode == 'bike':
+        record.ncycling += 1
+    
+    elif transport_mode == 'car':
+        record.ncar += 1
+    
+    elif transport_mode == 'bus':
+        record.npublictransport += 1
+    
+    elif transport_mode == 'carpooling':
+        record.ncarpooling += 1
+    
+    elif transport_mode == 'other':
+        record.nothers += 1
+
+    db.session.commit()
     # Update the class_data with the submitted vote
 
     # Redirect to the class_data page
