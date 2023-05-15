@@ -55,7 +55,8 @@ def submit_vote():
     votation_data = db.session.query(Votation).filter(Votation.date==today and Votation.class_id==class_id)
 
     if not votation_data.first():
-        todays_votation = Votation(date = today, class_id= class_id)
+        todays_votation = Votation(date = today, class_id= class_id, \
+            nwalking = 0, ncycling = 0, ncar = 0, npublic_transport = 0, ncarpooling = 0, nothers = 0)
         db.session.add(todays_votation)
         db.session.commit()
 
@@ -72,16 +73,19 @@ def submit_vote():
         record.ncar += 1
     
     elif transport_mode == 'bus':
-        record.npublictransport += 1
+        record.npublic_transport += 1
     
     elif transport_mode == 'carpooling':
         record.ncarpooling += 1
     
     elif transport_mode == 'other':
         record.nothers += 1
-
-    db.session.commit()
+    
     # Update the class_data with the submitted vote
+    db.session.commit()
+    total_transport = record.nwalking +  record.ncycling + record.ncar + record.npublic_transport + record.ncarpooling + record.nothers
+    transport_list = [record.nwalking, record.ncycling, record.ncar, record.npublic_transport, record.ncarpooling, record.nothers]
+    transport_list = map(lambda x: x*100/total_transport, transport_list)
 
     # Redirect to the class_data page
-    return redirect(url_for('class_data'))
+    return render_template('class_data.html', transport_list = transport_list)

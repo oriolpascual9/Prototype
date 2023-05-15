@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <!-- Add this line to include the CSS file -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/barplot.css') }}">
     <!-- Include Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
     <title>Class Data</title>
@@ -32,7 +33,22 @@
             <div class="col-md-6">
                 <h3>Visualize Data</h3>
                 <div id="data-dashboard" class="mt-4">
-                    <!-- Add data visualization elements here -->
+                    <table class="graph">
+                        <thead>
+                            <tr>
+                                <th scope="col">Item</th>
+                                <th scope="col">Percent</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for mode_use in transportation_list %}
+                            <tr style="height:{{mode_use}}%">
+                                <th scope="row">Your Blog</th>
+                                <td><span>{{mode_use}}%</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>                    
                 </div>
                 <div class="form-group mt-3">
                     <label for="date-filter">Filter by date</label>
