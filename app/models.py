@@ -1,11 +1,12 @@
 from app import db
 from sqlalchemy.orm import relationship
+import datetime
 
 class Votation(db.Model):
     __tablename__ = "votation"
 
     id = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.DateTime, default=datetime.utcnow)
+    date = db.Column(db.DateTime, default=datetime.datetime.now(datetime.timezone.utc))
     class_id = db.Column(db.Integer, db.ForeignKey('class.id'))
     voting_class = db.relationship('Class', back_populates='votations')
     results = db.Column(db.ARRAY(db.Integer))
@@ -28,7 +29,7 @@ class Class(db.Model):
     avg_results = db.Column(db.ARRAY(db.Integer))
     votations = relationship('Votation', back_populates='voting_class')
 
-	votes = db.relationship('Vote', back_populates='class_rel')
+    votes = db.relationship('Vote', back_populates='class_rel')
 
     def add_vote(self, transport_mode):
         new_vote = Vote(transport_mode=transport_mode, class_id=self.id)
