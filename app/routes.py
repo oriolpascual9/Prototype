@@ -4,7 +4,7 @@ from app.models import Class, Votation  # Updated to import the Class model from
 from flask import render_template, url_for, request, redirect
 from app import db
 from app import app
-from datetime import date, datetime
+import datetime
 
 @app.route('/')
 def home():  # Renamed to avoid conflicting with the other 'login' function
@@ -49,7 +49,8 @@ def submit_vote():
         return redirect(url_for('home'))
 
     # Fetch the class data using the class_id
-    today = datetime(2023, 5, 15, 11, 18, 23, 628854)
+    # today = datetime(2023, 5, 15, 11, 18, 23, 628854)
+    today = datetime.datetime.now(datetime.timezone.utc).date()
     transport_mode = request.form['transport_mode']
     votation_data = db.session.query(Votation).filter(Votation.date==today and Votation.class_id==class_id)
 

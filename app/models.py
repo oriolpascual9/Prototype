@@ -24,7 +24,7 @@ class Votation(db.Model):
     __tablename__ = "votation"
 
     id = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.DateTime, default=datetime.datetime.now(datetime.timezone.utc))
+    date = db.Column(db.Date, default=datetime.datetime.now(datetime.timezone.utc).date())
     class_id = db.Column(db.Integer, db.ForeignKey('class.id'))
     class_ = relationship("Class", back_populates="votation")
     npublic_transport = db.Column(db.Integer)
