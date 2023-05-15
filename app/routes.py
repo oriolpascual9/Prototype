@@ -4,6 +4,7 @@ from app.models import Class  # Updated to import the Class model from models.py
 from flask import render_template, url_for, request, redirect
 from app import db
 from app import app
+from datetime import date
 
 @app.route('/')
 def home():  # Renamed to avoid conflicting with the other 'login' function
@@ -26,7 +27,6 @@ def login():
     else:
         flash('Invalid username', 'error')
         return redirect(url_for('home'))
-
 
 @app.route('/class_data')
 def class_data():
