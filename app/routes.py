@@ -85,7 +85,10 @@ def submit_vote():
     db.session.commit()
     total_transport = record.nwalking +  record.ncycling + record.ncar + record.npublic_transport + record.ncarpooling + record.nothers
     transport_list = [record.nwalking, record.ncycling, record.ncar, record.npublic_transport, record.ncarpooling, record.nothers]
-    transport_list = map(lambda x: x*100/total_transport, transport_list)
+    transport_list = list(map(lambda x: x*100/total_transport, transport_list))
+
+    import sys
+    print(transport_list, file=sys.stderr)
 
     # Redirect to the class_data page
     return render_template('class_data.html', transport_list = transport_list)
