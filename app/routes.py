@@ -1,28 +1,19 @@
-import flask
-from flask import flash, session
-from app.models import Class, Votation  # Updated to import the Class model from models.py
-from flask import render_template, url_for, request, redirect
-from app import db
-from app import app
+from flask import flash, session, render_template, redirect, url_for, request
+from app.models import Class, Votation
+from app import db, app
 import datetime
 
 @app.route('/')
-def home():  # Renamed to avoid conflicting with the other 'login' function
+def home():
     return render_template('login.html')
-
 
 @app.route('/login', methods=['POST'])
 def login():
     username = request.form['username']
-
-    # Perform a query to find the class with the provided username
-    class_data = Class.query.filter_by(name=username).first()  # Updated the query
+    class_data = Class.query.filter_by(name=username).first()
 
     if class_data:
-        # Save the class_id in the session
         session['class_id'] = class_data.id
-
-        # Redirect to the class_data page for the specific class
         return redirect(url_for('class_data'))
     else:
         flash('Invalid username', 'error')
@@ -35,11 +26,19 @@ def class_data():
         flash('Please log in first', 'error')
         return redirect(url_for('home'))
 
-    # Fetch the class data using the class_id
     class_data = Class.query.get(class_id)
 
-    return render_template('class_data.html', class_data=class_data)
+    votation_data = Votation.query.filter(Votation.class_id == class_id).first()
+    transport_list = []
+    if votation_data:
+        total_transport = votation_data.nwalking + votation_data.ncycling + votation_data.ncar + \
+                          votation_data.npublic_transport + votation_data.ncarpooling + votation_data.nothers
+        if total_transport != 0:
+            transport_list = [votation_data.nwalking, votation_data.ncycling, votation_data.ncar,
+                              votation_data.npublic_transport, votation_data.ncarpooling, votation_data.nothers]
+            transport_list = [round((x * 100) / total_transport, 2) for x in transport_list]
 
+    return render_template('class_data.html', class_data=class_data, transport_list=transport_list)
 
 @app.route('/submit_vote', methods=['POST'])
 def submit_vote():
@@ -48,47 +47,29 @@ def submit_vote():
         flash('Please log in first', 'error')
         return redirect(url_for('home'))
 
-    # Fetch the class data using the class_id
-    # today = datetime(2023, 5, 15, 11, 18, 23, 628854)
     today = datetime.datetime.now(datetime.timezone.utc).date()
     transport_mode = request.form['transport_mode']
-    votation_data = db.session.query(Votation).filter(Votation.date==today and Votation.class_id==class_id)
+    votation_data = Votation.query.filter(Votation.date == today, Votation.class_id == class_id).first()
 
-    if not votation_data.first():
-        todays_votation = Votation(date = today, class_id= class_id, \
-            nwalking = 0, ncycling = 0, ncar = 0, npublic_transport = 0, ncarpooling = 0, nothers = 0)
-        db.session.add(todays_votation)
+    if not votation_data:
+        votation_data = Votation(date=today, class_id=class_id, nwalking=0, ncycling=0, ncar=0,
+                                 npublic_transport=0, ncarpooling=0, nothers=0)
+        db.session.add(votation_data)
         db.session.commit()
 
-        votation_data = db.session.query(Votation).filter(Votation.date==today and Votation.class_id==class_id)
-
-    record = votation_data.first() #should only be one
     if transport_mode == 'foot':
-        record.nwalking += 1
-
+        votation_data.nwalking += 1
     elif transport_mode == 'bike':
-        record.ncycling += 1
-    
+        votation_data.ncycling += 1
     elif transport_mode == 'car':
-        record.ncar += 1
-    
+        votation_data.ncar += 1
     elif transport_mode == 'bus':
-        record.npublic_transport += 1
-    
+        votation_data.npublic_transport += 1
     elif transport_mode == 'carpooling':
-        record.ncarpooling += 1
-    
+        votation_data.ncarpooling += 1
     elif transport_mode == 'other':
-        record.nothers += 1
-    
-    # Update the class_data with the submitted vote
+        votation_data.nothers += 1
+
     db.session.commit()
-    total_transport = record.nwalking +  record.ncycling + record.ncar + record.npublic_transport + record.ncarpooling + record.nothers
-    transport_list = [record.nwalking, record.ncycling, record.ncar, record.npublic_transport, record.ncarpooling, record.nothers]
-    transport_list = list(map(lambda x: x*100/total_transport, transport_list))
 
-    import sys
-    print(transport_list, file=sys.stderr)
-
-    # Redirect to the class_data page
-    return render_template('class_data.html', transport_list = transport_list)
+    return redirect(url_for('class_data'))
