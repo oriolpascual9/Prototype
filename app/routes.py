@@ -7,7 +7,6 @@ import sys
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
-
 @app.route('/')
 def home():
     return render_template('login.html')
@@ -32,8 +31,9 @@ def class_data():
         return redirect(url_for('home'))
 
     class_data = Class.query.get(class_id)
-
-    votation_data = Votation.query.filter(Votation.class_id == class_id).first()
+    today = datetime.datetime.now(datetime.timezone.utc).date()
+    
+    votation_data = Votation.query.filter(Votation.date == today and Votation.class_id == class_id).first()
     transport_list = []
     if votation_data:
         total_transport = votation_data.nwalking + votation_data.ncycling + votation_data.ncar + \
@@ -60,9 +60,10 @@ def submit_vote():
         if not transport_mode:
             flash('Transport mode not provided', 'error')
             return redirect(url_for('class_data'))
-
+        
         votation_data = Votation.query.filter(Votation.date == today, Votation.class_id == class_id).first()
 
+        #When there's no votation data for today, create it
         if not votation_data:
             votation_data = Votation(date=today, class_id=class_id, nwalking=0, ncycling=0, ncar=0,
                                      npublic_transport=0, ncarpooling=0, nothers=0)
@@ -105,7 +106,7 @@ def get_vote_data():
 
         if not votation_data:
             return jsonify({'error': 'No voting data available'}), 404
-
+        
         data = {
             'foot': votation_data.nwalking,
             'bike': votation_data.ncycling,
