@@ -101,8 +101,6 @@ def submit_vote():
         print(e)  # printing out the exception message
         return "An error occurred while submitting vote", 500  # return a user-friendly error message
 
-from flask import jsonify
-
 @app.route('/get_vote_data', methods=['GET'])
 def get_vote_data():
     try:
