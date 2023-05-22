@@ -33,6 +33,7 @@ class Votation(db.Model):
     nwalking = db.Column(db.Integer, default=0)
     ncarpooling = db.Column(db.Integer, default=0)
     nothers = db.Column(db.Integer, default=0)
+    score = db.Column(db.Integer, default=0)
     
 class School(db.Model):
     __tablename__ = 'schools'

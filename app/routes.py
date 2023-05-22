@@ -35,6 +35,7 @@ def class_data():
     
     votation_data = Votation.query.filter(Votation.date == today and Votation.class_id == class_id).first()
     transport_list = []
+    score = '0'
     if votation_data:
         total_transport = votation_data.nwalking + votation_data.ncycling + votation_data.ncar + \
                           votation_data.npublic_transport + votation_data.ncarpooling + votation_data.nothers
@@ -42,8 +43,10 @@ def class_data():
             transport_list = [votation_data.nwalking, votation_data.ncycling, votation_data.ncar,
                               votation_data.npublic_transport, votation_data.ncarpooling, votation_data.nothers]
             transport_list = [round((x * 100) / total_transport, 2) for x in transport_list]
+        
+        score = str(votation_data.score)
 
-    return render_template('class_data.html', class_data=class_data, transport_list=transport_list)
+    return render_template('class_data.html', class_data=class_data, transport_list=transport_list, score = score)
 
 @app.route('/submit_vote', methods=['POST'])
 def submit_vote():
@@ -66,22 +69,28 @@ def submit_vote():
         #When there's no votation data for today, create it
         if not votation_data:
             votation_data = Votation(date=today, class_id=class_id, nwalking=0, ncycling=0, ncar=0,
-                                     npublic_transport=0, ncarpooling=0, nothers=0)
+                                     npublic_transport=0, ncarpooling=0, nothers=0, score = 0)
             db.session.add(votation_data)
             db.session.commit()
 
         if transport_mode == 'foot':
             votation_data.nwalking += 1
+            votation_data.score += 25
         elif transport_mode == 'bike':
             votation_data.ncycling += 1
+            votation_data.score +=25
         elif transport_mode == 'car':
             votation_data.ncar += 1
+            votation_data.score += 5
         elif transport_mode == 'bus':
             votation_data.npublic_transport += 1
+            votation_data.score += 15
         elif transport_mode == 'carpooling':
             votation_data.ncarpooling += 1
+            votation_data.score += 10
         elif transport_mode == 'other':
             votation_data.nothers += 1
+            votation_data.score += 5
 
         db.session.commit()
 
