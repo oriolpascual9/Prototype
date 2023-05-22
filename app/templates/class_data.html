@@ -4,97 +4,164 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
     <style>
         body {
-            background: url({{ url_for('static', filename='images/Aircademy.png') }}) no-repeat center center fixed;
-            -webkit-background-size: cover;
-            -moz-background-size: cover;
-            -o-background-size: cover;
-            background-size: cover;
+            background-color: #D5E8D4;  /* This is a light green color */
         }
     </style>
+
     <title>Class Data</title>
 </head>
 <body>
     <div class="container">
-        <h2 class="text-center mt-4">Class Data</h2>
+        <h2 class="text-center mt-4" style="font-size: 32px; font-weight: bold; color: #333;">Class Data</h2>
 
-        <div class="row">
-            <div class="col-md-6">
-                <h3>Input Data</h3>
+        <!-- Move the date filter to the top -->
+        <div class="row justify-content-center mt-4">
+            <form id="date-filter-form" action="{{ url_for('class_data') }}" method="GET">
+                <div class="form-group">
+                    <label for="date-filter">Filter by date:</label>
+                    <input type="date" class="form-control" id="date-filter" name="date-filter" value="{{ selected_date }}">
+                </div>
+            </form>
+        </div>
+
+        <!-- Create a central div for Score -->
+        <div class="row justify-content-center mt-4">
+            <h3 style="font-size: 40px; font-weight: bold; color: #666;" class="score-animate">Score: {{ score }}</h3>
+        </div>
+
+        <!-- Align Input Data and Visualize Data side by side -->
+        <div class="row justify-content-center mt-4">
+            <div class="col-md-5">
+                <h3 style="font-size: 24px; font-weight: bold; color: #666;">Input Data</h3>
                 <div class="d-flex flex-wrap justify-content-center mt-4">
                     <form action="{{ url_for('submit_vote') }}" method="post">
-                        <button type="submit" name="transport_mode" value="foot">Foot</button>
-                        <button type="submit" name="transport_mode" value="bike">Bike</button>
-                        <button type="submit" name="transport_mode" value="car">Car</button>
-                        <button type="submit" name="transport_mode" value="bus">Bus</button>
-                        <button type="submit" name="transport_mode" value="carpooling">Carpooling</button>
-                        <button type="submit" name="transport_mode" value="other">Other</button>
+                        <button type="submit" name="transport_mode" value="foot" class="btn btn-primary" style="background-color: #8BC34A;">
+                            <i class="fas fa-walking"></i> Foot
+                        </button>
+                        <button type="submit" name="transport_mode" value="bike" class="btn btn-primary" style="background-color: #9CCC65;">
+                            <i class="fas fa-bicycle"></i> Bike
+                        </button>
+                        <button type="submit" name="transport_mode" value="bus" class="btn btn-primary" style="background-color: #FF9800;">
+                            <i class="fas fa-bus"></i> Bus
+                        </button>
+                        <button type="submit" name="transport_mode" value="carpooling" class="btn btn-primary" style="background-color: #FF5722;">
+                            <i class="fas fa-users"></i> Carpooling
+                        </button>
+                        <button type="submit" name="transport_mode" value="car" class="btn btn-primary" style="background-color: #FF3D00;">
+                            <i class="fas fa-car"></i> Car
+                        </button>
+                        <button type="submit" name="transport_mode" value="other" class="btn btn-primary" style="background-color: #607D8B;">
+                            <i class="fas fa-question"></i> Other
+                        </button>
                     </form>
                 </div>
                 <button class="btn btn-danger mt-3" id="return">Return</button>
-                <h3 topmargin="25px">Score: {{score}}</h3>
-
             </div>
-            <div class="col-md-6">
-                <h3>Visualize Data</h3>
+            <div class="col-md-5">
+                <h3 style="font-size: 24px; font-weight: bold; color: #666;">Visualize Data</h3>
                 <div id="data-dashboard" class="mt-4">
-                    <canvas id="histogram"></canvas>
-                </div>
-                <div class="form-group mt-3">
-                    <label for="date-filter">Filter by date</label>
-                    <input type="date" class="form-control" id="date-filter" name="date-filter">
+                    <canvas id="histogram" style="width: 100%; height: 400px;"></canvas>
                 </div>
             </div>
         </div>
     </div>
 
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
     <script src="{{ url_for('static', filename='js/chart.min.js') }}"></script>
     <script>
-        // Get the transport_list data from the Flask template variable
-        const transportList = JSON.parse('{{ transport_list | tojson | safe }}');
+      // Get the transport_list data from the Flask template variable
+      const transportList = JSON.parse('{{ transport_list | tojson | safe }}');
 
-        // Create a new histogram chart
-        const ctx = document.getElementById('histogram').getContext('2d');
-        const histogramChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['Foot', 'Bike', 'Car', 'Bus', 'Carpooling', 'Other'],
-                datasets: [{
-                    label: 'Number of Votes',
-                    data: transportList,
-                    backgroundColor: 'rgba(0, 123,255, 0.7)'
-              }]
-              },
-              options: {
-              // Add your Chart.js options here
+      // Create a new histogram chart
+      const ctx = document.getElementById('histogram').getContext('2d');
+      const histogramChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Foot', 'Bike', 'Bus', 'Carpooling', 'Car', 'Other'], // Update the labels order
+          datasets: [{
+            label: 'Number of Votes',
+            data: [transportList[0], transportList[1], transportList[2], transportList[3], transportList[4], transportList[5]], // Update the dataset order
+            backgroundColor: [
+              '#8BC34A', // Foot
+              '#4CAF50', // Bike
+              '#FFC107', // Bus
+              '#F44336', // Carpooling
+              '#FF5722', // Car
+              '#607D8B'  // Other
+            ]
+          }]
+        },
+        options: {
+          maintainAspectRatio: false, // Disable aspect ratio
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Number of Votes' // Add a title to the y-axis
               }
-              });
-              
-              document.getElementById("voteForm").addEventListener("submit", function(event) {
-                event.preventDefault();
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Transport Mode' // Add a title to the x-axis
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              display: false // Hide the legend
+            },
+            tooltip: {
+              enabled: true, // Enable tooltips
+              callbacks: {
+                label: function(tooltipItem) {
+                  // Format the tooltip label as an integer
+                  return Math.round(tooltipItem.value);
+                }
+              }
+            }
+          }
+        }
+      });
 
-                // Submit the form using AJAX
-                fetch("{{ url_for('submit_vote') }}", {
-                    method: "POST",
-                    body: new FormData(event.target)
-                }).then(response => {
-                    if (response.ok) {
-                        // Fetch the updated vote data
-                        fetch("{{ url_for('get_vote_data') }}").then(response => response.json()).then(data => {
-                            // Update the chart data and redraw the chart
-                            histogramChart.data.datasets[0].data = [data.foot, data.bike, data.car, data.bus, data.carpooling, data.other];
-                            histogramChart.update();
-                        });
-                    } else {
-                        // Handle the error (e.g., show an error message)
-                        console.error("Error submitting the vote");
-                    }
-                });
-            });
-        </script>
+      // Add event listener to the Return button
+      const returnButton = document.getElementById('return');
+      returnButton.addEventListener('click', function() {
+        // Send POST request to delete last vote
+        fetch('/delete_last_vote', {
+          method: 'POST'
+        })
+          .then(function(response) {
+            if (response.ok) {
+              // Reload the page to update the chart and score
+              location.reload();
+            } else {
+              console.error('Error deleting last vote:', response.statusText);
+            }
+          })
+          .catch(function(error) {
+            console.error('Error deleting last vote:', error);
+          });
+      });
+
+      // Add event listener to the date filter form
+        const dateFilterForm = document.getElementById('date-filter-form');
+        dateFilterForm.addEventListener('submit', function(event) {
+          event.preventDefault();
+          const selectedDate = document.getElementById('date-filter').value;
+          window.location.href = '{{ url_for("class_data") }}?date-filter=' + selectedDate;
+        });
+
+    </script>
+
+
+
 </body>
 </html>
