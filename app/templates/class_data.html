@@ -71,18 +71,17 @@
             </form>
         </div>
 
+         <!-- Show alert if there is no data -->
+        <div id="no-data-message" class="alert alert-warning alert-dismissible fade show" role="alert" style="display: none;">
+          No data for the selected date.
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        
         <!-- Pie chart -->
         <div id="pie-chart-container" class="mt-4 text-center" style="width: 80%; height: 320px; margin: 0 auto;">
             <canvas id="piechart" class="fadeIn"></canvas>
         </div>
 
-        <!-- Show alert if there is no data -->
-        {% if no_data %}
-        <div class="alert alert-warning alert-dismissible fade show" role="alert">
-          No data for the selected date.
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        {% endif %}
     </div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
@@ -165,7 +164,7 @@
       });
     </script>
 
-    <script type="text/javascript">
+    <<script type="text/javascript">
       // Function to generate pie chart data
       function generatePieChartData(transportData) {
         const transportLabels = ['Foot', 'Bike', 'Bus', 'Carpooling', 'Car', 'Other'];
@@ -213,6 +212,9 @@
 
       // Function to fetch and update chart
       function fetchAndUpdateChart(date) {
+        const messageElement = document.getElementById('no-data-message');
+        messageElement.style.display = 'none'; // Hide the message initially
+
         fetch('/get_vote_data?date=' + date)
           .then(function(response) {
             if (response.ok) {
@@ -233,6 +235,16 @@
           })
           .catch(function(error) {
             console.error('Error fetching data for selected date:', error);
+            // Display empty pie chart with label and show the message temporarily
+            pieChart.destroy(); // remove old chart
+            pieChart = new Chart(pieCtx, {
+              type: 'pie',
+              data: generatePieChartData({}),
+            });
+            messageElement.style.display = 'block'; // Show the message
+            setTimeout(function() {
+              messageElement.style.display = 'none'; // Hide the message after 3 seconds
+            }, 3000);
           });
       }
 

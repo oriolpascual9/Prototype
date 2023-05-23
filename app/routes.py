@@ -4,6 +4,8 @@ from app import db, app
 import datetime
 import logging
 import sys
+from flask import session
+
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
@@ -14,6 +16,12 @@ def home():
 @app.route('/login', methods=['POST'])
 def login():
     username = request.form['username']
+
+    # if the username is "admin", redirect to dashboard
+    if username == 'admin':
+        session['username'] = username
+        return redirect(url_for('dashboard'))
+
     class_data = Class.query.filter_by(name=username).first()
 
     if class_data:
@@ -196,5 +204,18 @@ def register():
 @app.route('/register')
 def register_page():
     return render_template('register.html')
+
+@app.route('/dashboard', methods=['GET', 'POST'])
+def dashboard():
+    if 'username' not in session or session['username'] != 'admin':
+        return redirect(url_for('login'))
+
+    # retrieve all the classes from the database
+    classes = Class.query.all()
+
+    # logic for filtering data and creating pie chart goes here
+
+    return render_template('dashboard.html', classes=classes)
+
 
 

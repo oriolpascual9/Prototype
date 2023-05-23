@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Dashboard</h1>
+    <div class="class-list">
+        <h2>All Classes</h2>
+        <select id="class-select">
+            {% for class in classes %}
+                <option value="{{ class.id }}">{{ class.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="pie-chart">
+        <canvas id="piechart"></canvas>
+    </div>
+    <form id="date-filter-form">
+        <input type="date" id="date-filter" name="date-filter">
+        <button type="submit">Filter</button>
+    </form>
+
+    <<script>
+      // Function to generate pie chart data
+      function generatePieChartData(transportData) {
+        const transportLabels = ['Foot', 'Bike', 'Bus', 'Carpooling', 'Car', 'Other'];
+        const transportDataList = [
+          transportData.foot,
+          transportData.bike,
+          transportData.bus,
+          transportData.carpooling,
+          transportData.car,
+          transportData.other,
+        ];
+        const backgroundColors = ['#8BC34A', '#9CCC65', '#FF9800', '#FF5722', '#FF3D00', '#607D8B'];
+
+        const totalVotes = transportDataList.reduce((a, b) => a + b, 0);
+        if (totalVotes === 0) {
+          return {
+            labels: ['No data for the selected date'],
+            datasets: [
+              {
+                data: [1], // We just need one section
+                backgroundColor: ['#CCCCCC'], // Any color of your choice
+              },
+            ],
+          };
+        }
+
+        return {
+          labels: transportLabels,
+          datasets: [
+            {
+              label: 'Votes',
+              data: transportDataList,
+              backgroundColor: backgroundColors,
+            },
+          ],
+        };
+      }
+
+      // Create the Pie chart
+      const pieCtx = document.getElementById('piechart').getContext('2d');
+      let pieChart = new Chart(pieCtx, {
+        type: 'pie',
+        data: generatePieChartData({}), // initial empty data
+      });
+
+      // Function to fetch and update chart
+      function fetchAndUpdateChart(classId, date) {
+        let url = '/get_vote_data?';
+        if (classId) {
+          url += 'classId=' + classId + '&';
+        }
+        if (date) {
+          url += 'date=' + date;
+        }
+
+        fetch(url)
+          .then(function(response) {
+            if (response.ok) {
+              return response.json();
+            } else {
+              console.log('Response status:', response.status);
+              console.log('Response status text:', response.statusText);
+              throw new Error('Error fetching data for selected date. Status: ' + response.status);
+            }
+          })
+          .then(function(transportData) {
+            console.log('Fetched transport data:', transportData);
+            pieChart.destroy(); // remove old chart
+            pieChart = new Chart(pieCtx, {
+              type: 'pie',
+              data: generatePieChartData(transportData),
+            });
+          })
+          .catch(function(error) {
+            console.error('Error fetching data for selected date:', error);
+          });
+      }
+
+      // Add event listener to the class select field
+      const classSelect = document.getElementById('class-select');
+      classSelect.addEventListener('change', function(event) {
+        const selectedDate = document.getElementById('date-filter').value;
+        const selectedClassId = classSelect.value;
+        fetchAndUpdateChart(selectedClassId, selectedDate);
+      });
+
+      // Add event listener to the date filter form
+      const dateFilterForm = document.getElementById('date-filter-form');
+      dateFilterForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        const selectedDate = document.getElementById('date-filter').value;
+        const selectedClassId = classSelect.value;
+        fetchAndUpdateChart(selectedClassId, selectedDate);
+      });
+
+      // Manually fetch data for the current date and selected class after the page load
+      const today = new Date().toISOString().substring(0, 10); // get today's date in 'YYYY-MM-DD' format
+      const selectedClassId = classSelect.value;
+      fetchAndUpdateChart(selectedClassId, today);
+    </script>
+</body>
+</html>
