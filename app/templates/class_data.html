@@ -13,20 +13,11 @@
     </style>
 
     <title>Class Data</title>
+
 </head>
 <body>
     <div class="container">
-        <h2 class="text-center mt-4" style="font-size: 32px; font-weight: bold; color: #333;">Class Data</h2>
-
-        <!-- Move the date filter to the top -->
-        <div class="row justify-content-center mt-4">
-            <form id="date-filter-form" action="{{ url_for('class_data') }}" method="GET">
-                <div class="form-group">
-                    <label for="date-filter">Filter by date:</label>
-                    <input type="date" class="form-control" id="date-filter" name="date-filter" value="{{ selected_date }}">
-                </div>
-            </form>
-        </div>
+    <h2 class="text-center mt-4" style="font-size: 32px; font-weight: bold; color: #333;">Class Data - {{ class_name }}</h2>
 
         <!-- Create a central div for Score -->
         <div class="row justify-content-center mt-4">
@@ -70,6 +61,10 @@
         </div>
     </div>
 
+        <!-- Pie chart -->
+                <div id="pie-chart-container" class="mt-4" style="width: 100%; height: 400px;">
+                    <canvas id="piechart" class="fadeIn"></canvas>
+                </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
@@ -86,7 +81,7 @@
           labels: ['Foot', 'Bike', 'Bus', 'Carpooling', 'Car', 'Other'], // Update the labels order
           datasets: [{
             label: 'Number of Votes',
-            data: [transportList[0], transportList[1], transportList[2], transportList[3], transportList[4], transportList[5]], // Update the dataset order
+            data: [transportList[0], transportList[1], transportList[3], transportList[4], transportList[2], transportList[5]], // Update the dataset order
             backgroundColor: [
               '#8BC34A', // Foot
               '#4CAF50', // Bike
@@ -159,6 +154,67 @@
           window.location.href = '{{ url_for("class_data") }}?date-filter=' + selectedDate;
         });
 
+    </script>
+    <script type="text/javascript">
+      // Parse the transport data list
+      const transportDataList = JSON.parse('{{ transport_list | tojson | safe }}');
+
+      // Separate labels and data for readability
+      const transportLabels = ['Foot', 'Bike', 'Bus', 'Carpooling', 'Car', 'Other'];
+      const transportData = [
+        transportDataList[0],
+        transportDataList[1],
+        transportDataList[2],
+        transportDataList[3],
+        transportDataList[4],
+        transportDataList[5],
+      ];
+      const backgroundColors = ['#8BC34A', '#9CCC65', '#FF9800', '#FF5722', '#FF3D00', '#607D8B'];
+
+      // Prepare the data for the Pie chart
+      const pieChartData = {
+        labels: transportLabels,
+        datasets: [
+          {
+            label: 'Votes',
+            data: transportData,
+            backgroundColor: backgroundColors,
+          },
+        ],
+      };
+
+      // Get the context for the pie chart
+      const pieCtx = document.getElementById('piechart').getContext('2d');
+
+      // Create the Pie chart
+      new Chart(pieCtx, {
+        type: 'pie',
+        data: pieChartData,
+        options: {
+          responsive: true,
+          maintainAspectRatio: false, // Ensure that the chart fits its container
+          plugins: {
+            legend: {
+              position: 'top',
+            },
+            title: {
+              display: true,
+              text: 'Transport Modes Pie Chart',
+            },
+          },
+          tooltips: {
+            callbacks: {
+              label: function (tooltipItem, data) {
+                const dataset = data.datasets[tooltipItem.datasetIndex];
+                const total = dataset.data.reduce((previousValue, currentValue) => previousValue + currentValue);
+                const currentValue = dataset.data[tooltipItem.index];
+                const percentage = Math.round((currentValue / total) * 100);
+                return `${dataset.label}: ${currentValue} (${percentage}%)`;
+              },
+            },
+          },
+        },
+      });
     </script>
 
 

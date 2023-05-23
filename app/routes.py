@@ -31,6 +31,7 @@ def class_data():
         return redirect(url_for('home'))
 
     class_data = Class.query.get(class_id)
+    class_name = class_data.name if class_data else ''
     
     # Get the selected date from the request's query parameters
     selected_date = request.args.get('date-filter')
@@ -51,7 +52,8 @@ def class_data():
         
         score = str(votation_data.score)
 
-    return render_template('class_data.html', class_data=class_data, transport_list=transport_list, score=score, selected_date=selected_date)
+        return render_template('class_data.html', class_data=class_data, transport_list=transport_list, score=score, selected_date=selected_date, class_name=class_name)
+
 
 
 @app.route('/submit_vote', methods=['POST'])
