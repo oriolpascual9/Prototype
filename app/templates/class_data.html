@@ -17,11 +17,11 @@
 </head>
 <body>
     <div class="container">
-    <h2 class="text-center mt-4" style="font-size: 32px; font-weight: bold; color: #333;">Class Data - {{ class_name }}</h2>
+        <h2 class="text-center mt-4" style="font-size: 32px; font-weight: bold; color: #333;">Class Data - {{ class_name }}</h2>
 
         <!-- Create a central div for Score -->
         <div class="row justify-content-center mt-4">
-            <h3 style="font-size: 40px; font-weight: bold; color: #666;" class="score-animate">Score: {{ score }}</h3>
+            <h3 style="font-size: 40px; font-weight: bold; color: #FF0000;" class="score-animate">Score: {{ score }}</h3>
         </div>
 
         <!-- Align Input Data and Visualize Data side by side -->
@@ -50,22 +50,40 @@
                         </button>
                     </form>
                 </div>
-                <button class="btn btn-danger mt-3" id="return">Return</button>
+                <div class="row justify-content-center mt-4">
+                    <button class="btn btn-danger" id="return">Delete last vote</button>
+                </div>
             </div>
             <div class="col-md-5">
                 <h3 style="font-size: 24px; font-weight: bold; color: #666;">Visualize Data</h3>
                 <div id="data-dashboard" class="mt-4">
-                    <canvas id="histogram" style="width: 100%; height: 400px;"></canvas>
+                    <canvas id="histogram" style="width: 80%; height: 320px;"></canvas>
                 </div>
             </div>
         </div>
-    </div>
+
+        <!-- Date filter form -->
+        <div class="mt-4 text-center">
+            <form id="date-filter-form" style="display: inline-block;">
+                <label for="date-filter">Select a date:</label>
+                <input type="date" id="date-filter" name="date-filter" value="{{ selected_date }}" style="width: 50%;">
+                <button type="submit" style="width: 100px; height: 30px;">Filter</button>
+            </form>
+        </div>
 
         <!-- Pie chart -->
-                <div id="pie-chart-container" class="mt-4" style="width: 100%; height: 400px;">
-                    <canvas id="piechart" class="fadeIn"></canvas>
-                </div>
+        <div id="pie-chart-container" class="mt-4 text-center" style="width: 80%; height: 320px; margin: 0 auto;">
+            <canvas id="piechart" class="fadeIn"></canvas>
+        </div>
 
+        <!-- Show alert if there is no data -->
+        {% if no_data %}
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+          No data for the selected date.
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endif %}
+    </div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
     <script src="{{ url_for('static', filename='js/chart.min.js') }}"></script>
@@ -145,79 +163,91 @@
             console.error('Error deleting last vote:', error);
           });
       });
-
-      // Add event listener to the date filter form
-        const dateFilterForm = document.getElementById('date-filter-form');
-        dateFilterForm.addEventListener('submit', function(event) {
-          event.preventDefault();
-          const selectedDate = document.getElementById('date-filter').value;
-          window.location.href = '{{ url_for("class_data") }}?date-filter=' + selectedDate;
-        });
-
     </script>
+
     <script type="text/javascript">
-      // Parse the transport data list
-      const transportDataList = JSON.parse('{{ transport_list | tojson | safe }}');
+      // Function to generate pie chart data
+      function generatePieChartData(transportData) {
+        const transportLabels = ['Foot', 'Bike', 'Bus', 'Carpooling', 'Car', 'Other'];
+        const transportDataList = [
+          transportData.foot,
+          transportData.bike,
+          transportData.bus,
+          transportData.carpooling,
+          transportData.car,
+          transportData.other,
+        ];
+        const backgroundColors = ['#8BC34A', '#9CCC65', '#FF9800', '#FF5722', '#FF3D00', '#607D8B'];
 
-      // Separate labels and data for readability
-      const transportLabels = ['Foot', 'Bike', 'Bus', 'Carpooling', 'Car', 'Other'];
-      const transportData = [
-        transportDataList[0],
-        transportDataList[1],
-        transportDataList[2],
-        transportDataList[3],
-        transportDataList[4],
-        transportDataList[5],
-      ];
-      const backgroundColors = ['#8BC34A', '#9CCC65', '#FF9800', '#FF5722', '#FF3D00', '#607D8B'];
+        const totalVotes = transportDataList.reduce((a, b) => a + b, 0);
+        if (totalVotes === 0) {
+          return {
+            labels: ['No data for the selected date'],
+            datasets: [
+              {
+                data: [1], // We just need one section
+                backgroundColor: ['#CCCCCC'], // Any color of your choice
+              },
+            ],
+          };
+        }
 
-      // Prepare the data for the Pie chart
-      const pieChartData = {
-        labels: transportLabels,
-        datasets: [
-          {
-            label: 'Votes',
-            data: transportData,
-            backgroundColor: backgroundColors,
-          },
-        ],
-      };
-
-      // Get the context for the pie chart
-      const pieCtx = document.getElementById('piechart').getContext('2d');
+        return {
+          labels: transportLabels,
+          datasets: [
+            {
+              label: 'Votes',
+              data: transportDataList,
+              backgroundColor: backgroundColors,
+            },
+          ],
+        };
+      }
 
       // Create the Pie chart
-      new Chart(pieCtx, {
+      const pieCtx = document.getElementById('piechart').getContext('2d');
+      let pieChart = new Chart(pieCtx, {
         type: 'pie',
-        data: pieChartData,
-        options: {
-          responsive: true,
-          maintainAspectRatio: false, // Ensure that the chart fits its container
-          plugins: {
-            legend: {
-              position: 'top',
-            },
-            title: {
-              display: true,
-              text: 'Transport Modes Pie Chart',
-            },
-          },
-          tooltips: {
-            callbacks: {
-              label: function (tooltipItem, data) {
-                const dataset = data.datasets[tooltipItem.datasetIndex];
-                const total = dataset.data.reduce((previousValue, currentValue) => previousValue + currentValue);
-                const currentValue = dataset.data[tooltipItem.index];
-                const percentage = Math.round((currentValue / total) * 100);
-                return `${dataset.label}: ${currentValue} (${percentage}%)`;
-              },
-            },
-          },
-        },
+        data: generatePieChartData({}), // initial empty data
       });
+
+      // Function to fetch and update chart
+      function fetchAndUpdateChart(date) {
+        fetch('/get_vote_data?date=' + date)
+          .then(function(response) {
+            if (response.ok) {
+              return response.json();
+            } else {
+              console.log('Response status:', response.status);
+              console.log('Response status text:', response.statusText);
+              throw new Error('Error fetching data for selected date. Status: ' + response.status);
+            }
+          })
+          .then(function(transportData) {
+            console.log('Fetched transport data:', transportData);
+            pieChart.destroy(); // remove old chart
+            pieChart = new Chart(pieCtx, {
+              type: 'pie',
+              data: generatePieChartData(transportData),
+            });
+          })
+          .catch(function(error) {
+            console.error('Error fetching data for selected date:', error);
+          });
+      }
+
+      // Add event listener to the date filter form
+      const dateFilterForm = document.getElementById('date-filter-form');
+      dateFilterForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        const selectedDate = document.getElementById('date-filter').value;
+        fetchAndUpdateChart(selectedDate);
+      });
+
+      // Manually fetch data for the current date after the page load
+      const today = new Date().toISOString().substring(0, 10); // get today's date in 'YYYY-MM-DD' format
+      fetchAndUpdateChart(today);
     </script>
-
-
 
 </body>
 </html>

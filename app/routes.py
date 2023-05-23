@@ -41,6 +41,8 @@ def class_data():
         selected_date = datetime.datetime.now(datetime.timezone.utc).date()
 
     votation_data = Votation.query.filter(Votation.date == selected_date, Votation.class_id == class_id).first()
+
+    no_data = False
     transport_list = []
     score = '0'
     if votation_data:
@@ -51,10 +53,10 @@ def class_data():
                               votation_data.npublic_transport, votation_data.ncarpooling, votation_data.nothers]
         
         score = str(votation_data.score)
+    else:
+        no_data = True
 
-        return render_template('class_data.html', class_data=class_data, transport_list=transport_list, score=score, selected_date=selected_date, class_name=class_name)
-
-
+    return render_template('class_data.html', class_data=class_data, transport_list=transport_list, score=score, selected_date=selected_date, class_name=class_name, no_data=no_data)
 
 @app.route('/submit_vote', methods=['POST'])
 def submit_vote():
