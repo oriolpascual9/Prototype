@@ -183,3 +183,18 @@ def delete_last_vote():
     except Exception as e:
         logging.exception("Exception occurred")
         return jsonify({'error': 'An error occurred while deleting the last vote'}), 500
+@app.route('/register', methods=['POST'])
+def register():
+    classname = request.form['classname']
+    nstudents = int(request.form['nstudents'])
+    school_id = int(request.form['school'])
+    new_class = Class(name=classname, nstudents=nstudents, school_id=school_id)
+    db.session.add(new_class)
+    db.session.commit()
+    return redirect('/')
+
+@app.route('/register')
+def register_page():
+    return render_template('register.html')
+
+

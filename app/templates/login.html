@@ -21,14 +21,93 @@
         }
         #bike, #walking, #bus {
             position: absolute;
-            bottom: 0;
             width: 100px;
+            animation-duration: 5s;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+        }
+        #bike {
+            animation-name: bike-animation;
+        }
+        #walking {
+            animation-name: walking-animation;
+        }
+        #bus {
+            animation-name: bus-animation;
         }
         .container {
             position: relative;
             z-index: 1;
         }
+
+        @keyframes bike-animation {
+            0% {
+                left: -100px;
+                top: 50%;
+                transform: translateY(-50%);
+            }
+            50% {
+                left: calc(100% + 100px);
+                top: 50%;
+                transform: translateY(-50%);
+            }
+            100% {
+                left: -100px;
+                top: 50%;
+                transform: translateY(-50%);
+            }
+        }
+
+        @keyframes walking-animation {
+            0% {
+                right: -100px;
+                top: 20%;
+                transform: translateY(-50%);
+            }
+            50% {
+                right: calc(100% + 100px);
+                top: 20%;
+                transform: translateY(-50%);
+            }
+            100% {
+                right: -100px;
+                top: 20%;
+                transform: translateY(-50%);
+            }
+        }
+
+        @keyframes bus-animation {
+            0% {
+                left: -100px;
+                top: 80%;
+                transform: translateY(-50%);
+            }
+            50% {
+                left: calc(100% + 100px);
+                top: 80%;
+                transform: translateY(-50%);
+            }
+            100% {
+                left: -100px;
+                top: 80%;
+                transform: translateY(-50%);
+            }
+        }
+        /* Adjust button size */
+        button[type="submit"],
+        .btn-secondary {
+            width: 100%;
+            background-color: #007bff
+        }
+
+        /* Display buttons on the same line */
+        .btn-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
     </style>
+
     <title>Login</title>
 </head>
 <body>
@@ -41,13 +120,16 @@
         <div class="row justify-content-center">
             <div class="col-md-6">
                 <h2 class="text-center mt-4">Login</h2>
-                <form action="{{ url_for('login') }}" method="post" class="mt-4"> <!-- Updated the action attribute -->
+                <form action="{{ url_for('login') }}" method="post" class="mt-4">
                     <div class="form-group">
                         <label for="username">Class: </label>
                         <input type="text" class="form-control" id="username" name="username" required>
                     </div>
-                    <!-- Removed the password input field -->
-                    <button type="submit" class="btn btn-primary mt-3">Login</button>
+                    <!-- Rearranged buttons -->
+                    <div class="btn-container">
+                        <a href="{{ url_for('register') }}" class="btn btn-secondary">Register</a>
+                        <button type="submit" class="btn btn-login">Login</button>
+                    </div>
                 </form>
             </div>
         </div>
