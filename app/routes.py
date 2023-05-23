@@ -6,8 +6,11 @@ import logging
 import sys
 from flask import session
 
-
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+
+#Definition of global variables for flow control
+lastVote = ""
+deletedLastVote = True
 
 @app.route('/')
 def home():
@@ -108,7 +111,10 @@ def submit_vote():
         elif transport_mode == 'other':
             votation_data.nothers += 1
             votation_data.score += 5
-
+        
+        global lastVote, deletedLastVote
+        lastVote = transport_mode # To be used in Delete Last Vote
+        deletedLastVote = False
         db.session.commit()
 
         return redirect(url_for('class_data'))
@@ -164,33 +170,37 @@ def delete_last_vote():
         if not votation_data:
             return jsonify({'error': 'No vote to delete'}), 404
 
-        # Decrement the count and score based on the transport mode of the last vote
-        if votation_data.nothers > 0:
-            votation_data.nothers -= 1
-            votation_data.score -= 5
-        elif votation_data.ncarpooling > 0:
-            votation_data.ncarpooling -= 1
-            votation_data.score -= 10
-        elif votation_data.npublic_transport > 0:
-            votation_data.npublic_transport -= 1
-            votation_data.score -= 15
-        elif votation_data.ncar > 0:
-            votation_data.ncar -= 1
-            votation_data.score -= 5
-        elif votation_data.ncycling > 0:
-            votation_data.ncycling -= 1
-            votation_data.score -= 25
-        elif votation_data.nwalking > 0:
-            votation_data.nwalking -= 1
-            votation_data.score -= 25
+        global lastVote, deletedLastVote
+        if not deletedLastVote:
+            # Decrement the count and score based on the transport mode of the last vote
+            if votation_data.nothers > 0 and lastVote == 'other':
+                votation_data.nothers -= 1
+                votation_data.score -= 5
+            elif votation_data.ncarpooling > 0 and lastVote == 'carpooling':
+                votation_data.ncarpooling -= 1
+                votation_data.score -= 10
+            elif votation_data.npublic_transport > 0 and lastVote == 'bus':
+                votation_data.npublic_transport -= 1
+                votation_data.score -= 15
+            elif votation_data.ncar > 0 and lastVote == 'car':
+                votation_data.ncar -= 1
+                votation_data.score -= 5
+            elif votation_data.ncycling > 0 and lastVote == 'bike':
+                votation_data.ncycling -= 1
+                votation_data.score -= 25
+            elif votation_data.nwalking > 0 and lastVote == 'foot':
+                votation_data.nwalking -= 1
+                votation_data.score -= 25
 
         db.session.commit()
 
+        deletedLastVote = True
         return jsonify({'success': True})
 
     except Exception as e:
         logging.exception("Exception occurred")
         return jsonify({'error': 'An error occurred while deleting the last vote'}), 500
+    
 @app.route('/register', methods=['POST'])
 def register():
     classname = request.form['classname']
