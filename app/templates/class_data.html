@@ -112,20 +112,23 @@
         options: {
           maintainAspectRatio: false, // Disable aspect ratio
           scales: {
-            y: {
+          yAxes: [{
+            ticks: {
               beginAtZero: true,
-              title: {
-                display: true,
-                text: 'Number of Votes' // Add a title to the y-axis
-              }
+              min: 0
             },
-            x: {
-              title: {
-                display: true,
-                text: 'Transport Mode' // Add a title to the x-axis
-              }
+            title: {
+              display: true,
+              text: 'Number of Votes' // Add a title to the y-axis
             }
-          },
+          }],
+          xAxes: [{
+            title: {
+              display: true,
+              text: 'Transport Mode' // Add a title to the x-axis
+            }
+          }]
+        },
           plugins: {
             legend: {
               display: false // Hide the legend
