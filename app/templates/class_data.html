@@ -21,8 +21,8 @@
 
         <!-- Create a central div for Score -->
         <div class="row justify-content-center mt-4">
-            <h3 style="font-size: 40px; font-weight: bold; color: #FF0000;" class="score-animate">Score: {{ score }}</h3>
-        </div>
+          <h3 style="font-size: 40px; font-weight: bold; color: #FF0000;" class="score-animate">Total Score: {{ score }}</h3>
+      </div>
 
         <!-- Align Input Data and Visualize Data side by side -->
         <div class="row justify-content-center mt-4">
@@ -37,7 +37,7 @@
                             <i class="fas fa-bicycle"></i> Bike
                         </button>
                         <button type="submit" name="transport_mode" value="bus" class="btn btn-primary" style="background-color: #FF9800;">
-                            <i class="fas fa-bus"></i> Bus
+                            <i class="fas fa-bus"></i> Public Transport
                         </button>
                         <button type="submit" name="transport_mode" value="carpooling" class="btn btn-primary" style="background-color: #FF5722;">
                             <i class="fas fa-users"></i> Carpooling
@@ -95,7 +95,7 @@
       const histogramChart = new Chart(ctx, {
         type: 'bar',
         data: {
-          labels: ['Foot', 'Bike', 'Bus', 'Carpooling', 'Car', 'Other'], // Update the labels order
+          labels: ['Foot', 'Bike', 'Public Transport', 'Carpooling', 'Car', 'Other'], // Update the labels order
           datasets: [{
             label: 'Number of Votes',
             data: [transportList[0], transportList[1], transportList[3], transportList[4], transportList[2], transportList[5]], // Update the dataset order
@@ -170,7 +170,7 @@
     <<script type="text/javascript">
       // Function to generate pie chart data
       function generatePieChartData(transportData) {
-        const transportLabels = ['Foot', 'Bike', 'Bus', 'Carpooling', 'Car', 'Other'];
+        const transportLabels = ['Foot', 'Bike', 'Public Transport', 'Carpooling', 'Car', 'Other'];
         const transportDataList = [
           transportData.foot,
           transportData.bike,
